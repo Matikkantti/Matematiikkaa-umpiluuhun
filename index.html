@@ -3,27 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <title>Matikkapeli</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      font-size: 18px;
+      width: 70px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    td, th {
+      padding: 8px 12px;
+      border-bottom: 1px solid #444;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>Matematiikkapeli</h1>
+<h1>Matematiikkaa umpiluuhun</h1>
 
-<p>Ratkaise: 2x + 4 = 10</p>
+<p>Pisteet: <span id="pisteet">0</span></p>
+<p>Aika: <span id="aika">60</span></p>
 
-<input type="number" id="vastaus">
+<hr>
+
+<h2 id="tehtava"></h2>
+
+<input id="x" type="number" placeholder="x">
+<input id="y" type="number" placeholder="y">
+
+<br>
 <button onclick="tarkista()">Tarkista</button>
 
-<p id="tulos"></p>
+<p id="palaute"></p>
+
+<div id="loppu" style="display:none;">
+  <h2>Peli ohi!</h2>
+  <input id="nimi" placeholder="Nimi">
+  <button onclick="tallenna()">Tallenna highscore</button>
+</div>
+
+<h2>🏆 Highscore</h2>
+<table>
+  <thead>
+    <tr><th>#</th><th>Nimi</th><th>Pisteet</th></tr>
+  </thead>
+  <tbody id="lista"></tbody>
+</table>
 
 <script>
+let tehtavat = [
+  {k:"2x + y = 7, x + y = 5", x:2, y:3},
+  {k:"3x - y = 5, x + y = 7", x:3, y:4},
+  {k:"2x + 3y = 13, x + y = 5", x:2, y:3},
+  {k:"4x + y = 9, x + y = 4", x:1, y:3},
+  {k:"5x - y = 9, x + y = 3", x:2, y:1}
+];
+
+let i = 0;
+let pisteet = 0;
+let aika = 60;
+let peli = true;
+
+function nayta() {
+  document.getElementById("tehtava").innerText = tehtavat[i].k;
+}
+
 function tarkista() {
-  let vastaus = document.getElementById("vastaus").value;
-  if (vastaus == 3) {
-    document.getElementById("tulos").innerText = "Oikein!";
+  if (!peli) return;
+
+  let x = Number(document.getElementById("x").value);
+  let y = Number(document.getElementById("y").value);
+
+  if (x === tehtavat[i].x && y === tehtavat[i].y) {
+    pisteet++;
+    document.getElementById("pisteet").innerText = pisteet;
+    document.getElementById("palaute").innerText = "Oikein!";
+    i++;
+
+    if (i < tehtavat.length) {
+      nayta();
+    } else {
+      lopeta();
+    }
   } else {
-    document.getElementById("tulos").innerText = "Väärin!";
+    document.getElementById("palaute").innerText = "Väärin!";
   }
 }
+
+function lopeta() {
+  peli = false;
+  document.getElementById("loppu").style.display = "block";
+}
+
+setInterval(() => {
+  if (!peli) return;
+  aika--;
+  document.getElementById("aika").innerText = aika;
+
+  if (aika <= 0) {
+    lopeta();
+  }
+}, 1000);
+
+function tallenna() {
+  let nimi = document.getElementById("nimi").value;
+
+  let lista = JSON.parse(localStorage.getItem("score") || "[]");
+
+  lista.push({nimi, pisteet});
+
+  lista.sort((a,b) => b.pisteet - a.pisteet);
+  lista = lista.slice(0, 10);
+
+  localStorage.setItem("score", JSON.stringify(lista));
+  naytaLista();
+}
+
+function naytaLista() {
+  let lista = JSON.parse(localStorage.getItem("score") || "[]");
+  let html = "";
+
+  lista.forEach((rivi, index) => {
+    html += `<tr>
+      <td>${index+1}</td>
+      <td>${rivi.nimi}</td>
+      <td>${rivi.pisteet}</td>
+    </tr>`;
+  });
+
+  document.getElementById("lista").innerHTML = html;
+}
+
+nayta();
+naytaLista();
 </script>
 
 </body>
