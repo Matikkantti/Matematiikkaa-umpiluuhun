@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <title>Matikkapeli</title>
+</head>
+<body>
+
+<h1>Matematiikkapeli</h1>
+
+<p>Ratkaise: 2x + 4 = 10</p>
+
+<input type="number" id="vastaus">
+<button onclick="tarkista()">Tarkista</button>
+
+<p id="tulos"></p>
+
+<script>
+function tarkista() {
+  let vastaus = document.getElementById("vastaus").value;
+  if (vastaus == 3) {
+    document.getElementById("tulos").innerText = "Oikein!";
+  } else {
+    document.getElementById("tulos").innerText = "Väärin!";
+  }
+}
+</script>
+
+</body>
+</html>
