@@ -2,142 +2,233 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8">
-  <title>Matikkapeli</title>
+  <title>Matematiikkaa umpiluuhun</title>
   <style>
     body {
-      font-family: Arial;
-      background: #111;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #111827, #1f2937);
       color: white;
       text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .kortti {
+      max-width: 650px;
+      margin: 20px auto;
+      background: #111827;
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 0 20px #000;
+    }
+
+    h1 {
+      color: #facc15;
+    }
+
+    .tehtava {
+      font-size: 28px;
+      margin: 25px 0;
     }
 
     input {
-      padding: 10px;
-      margin: 5px;
-      font-size: 18px;
-      width: 70px;
+      padding: 12px;
+      margin: 8px;
+      font-size: 22px;
+      width: 90px;
       text-align: center;
+      border-radius: 10px;
+      border: none;
     }
 
     button {
-      padding: 10px 15px;
-      font-size: 16px;
-      margin: 5px;
+      padding: 12px 20px;
+      font-size: 18px;
+      margin: 8px;
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+
+    #palaute {
+      font-size: 22px;
+      min-height: 40px;
     }
 
     table {
       margin: 20px auto;
       border-collapse: collapse;
+      width: 90%;
+      max-width: 500px;
     }
 
-    td, th {
-      padding: 8px 12px;
-      border-bottom: 1px solid #444;
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #374151;
+    }
+
+    th {
+      color: #facc15;
+    }
+
+    .pieni {
+      color: #d1d5db;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
 
-<h1>Matematiikkaa umpiluuhun</h1>
+<div class="kortti">
+  <h1>🧠 Matematiikkaa umpiluuhun</h1>
+  <h2>Yhtälöparipeli</h2>
 
-<p>Pisteet: <span id="pisteet">0</span></p>
-<p>Aika: <span id="aika">60</span></p>
+  <p><b>Kysymys:</b> <span id="numero">1</span> / 10</p>
+  <p><b>Oikein:</b> <span id="pisteet">0</span></p>
 
-<hr>
+  <div class="tehtava" id="tehtava"></div>
 
-<h2 id="tehtava"></h2>
+  <input id="x" type="number" placeholder="x">
+  <input id="y" type="number" placeholder="y">
 
-<input id="x" type="number" placeholder="x">
-<input id="y" type="number" placeholder="y">
+  <br>
+  <button onclick="tarkista()">Tarkista</button>
+  <button onclick="aloitaAlusta()">Aloita alusta</button>
 
-<br>
-<button onclick="tarkista()">Tarkista</button>
+  <p id="palaute"></p>
+</div>
 
-<p id="palaute"></p>
+<div class="kortti" id="loppu" style="display:none;">
+  <h2>🏁 Peli päättyi!</h2>
+  <p id="lopputulos"></p>
 
-<div id="loppu" style="display:none;">
-  <h2>Peli ohi!</h2>
   <input id="nimi" placeholder="Nimi">
   <button onclick="tallenna()">Tallenna highscore</button>
 </div>
 
-<h2>🏆 Highscore</h2>
-<table>
-  <thead>
-    <tr><th>#</th><th>Nimi</th><th>Pisteet</th></tr>
-  </thead>
-  <tbody id="lista"></tbody>
-</table>
+<div class="kortti">
+  <h2>🏆 Highscore</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nimi</th>
+        <th>Oikein</th>
+      </tr>
+    </thead>
+    <tbody id="lista"></tbody>
+  </table>
+  <button onclick="tyhjennaHighscore()">Tyhjennä highscore</button>
+  <p class="pieni">Tulokset tallentuvat tämän selaimen muistiin.</p>
+</div>
 
 <script>
 let tehtavat = [
-  {k:"2x + y = 7, x + y = 5", x:2, y:3},
-  {k:"3x - y = 5, x + y = 7", x:3, y:4},
-  {k:"2x + 3y = 13, x + y = 5", x:2, y:3},
-  {k:"4x + y = 9, x + y = 4", x:1, y:3},
-  {k:"5x - y = 9, x + y = 3", x:2, y:1}
+  {k:"2x + y = 7  ja  x + y = 5", x:2, y:3},
+  {k:"3x - y = 5  ja  x + y = 7", x:3, y:4},
+  {k:"2x + 3y = 13  ja  x + y = 5", x:2, y:3},
+  {k:"4x + y = 9  ja  x + y = 4", x:1, y:3},
+  {k:"5x - y = 9  ja  x + y = 3", x:2, y:1},
+
+  // Tässä muutama mausteellisempi:
+  {k:"x - y = 2  ja  x + y = 10", x:6, y:4},
+  {k:"2x - y = 1  ja  x + y = 8", x:3, y:5},
+  {k:"3x + 2y = 18  ja  x + y = 7", x:4, y:3},
+  {k:"-x + 2y = 4  ja  x + y = 8", x:4, y:4},
+  {k:"6x - 2y = 10  ja  x + y = 6", x:3, y:3}
 ];
 
 let i = 0;
 let pisteet = 0;
-let aika = 60;
-let peli = true;
+let peliOhi = false;
 
 function nayta() {
+  document.getElementById("numero").innerText = i + 1;
+  document.getElementById("pisteet").innerText = pisteet;
   document.getElementById("tehtava").innerText = tehtavat[i].k;
+  document.getElementById("x").value = "";
+  document.getElementById("y").value = "";
 }
 
 function tarkista() {
-  if (!peli) return;
+  if (peliOhi) return;
 
   let x = Number(document.getElementById("x").value);
   let y = Number(document.getElementById("y").value);
+  let oikea = tehtavat[i];
 
-  if (x === tehtavat[i].x && y === tehtavat[i].y) {
+  if (x === oikea.x && y === oikea.y) {
     pisteet++;
-    document.getElementById("pisteet").innerText = pisteet;
-    document.getElementById("palaute").innerText = "Oikein!";
-    i++;
-
-    if (i < tehtavat.length) {
-      nayta();
-    } else {
-      lopeta();
-    }
+    document.getElementById("palaute").innerText = "🔥 Oikein! Umpiluuhun meni!";
   } else {
-    document.getElementById("palaute").innerText = "Väärin!";
+    document.getElementById("palaute").innerText =
+      "❌ Väärin. Oikea vastaus: x = " + oikea.x + ", y = " + oikea.y;
+  }
+
+  i++;
+
+  if (i < tehtavat.length) {
+    setTimeout(nayta, 1500);
+  } else {
+    setTimeout(lopeta, 1500);
   }
 }
 
 function lopeta() {
-  peli = false;
+  peliOhi = true;
   document.getElementById("loppu").style.display = "block";
+
+  let viesti = "";
+
+  if (pisteet === 10) {
+    viesti = "Täydellinen suoritus! 10 / 10. Nyt on matikka umpiluussa 💎";
+  } else if (pisteet >= 7) {
+    viesti = "Hyvä veto! " + pisteet + " / 10 oikein. Tästä tulee vielä kone.";
+  } else if (pisteet >= 4) {
+    viesti = "Ihan ok! " + pisteet + " / 10 oikein. Treenillä nousee.";
+  } else {
+    viesti = "Tuli vähän mutkaa matkaan: " + pisteet + " / 10 oikein. Uusi kierros vaan.";
+  }
+
+  document.getElementById("lopputulos").innerText = viesti;
 }
 
-setInterval(() => {
-  if (!peli) return;
-  aika--;
-  document.getElementById("aika").innerText = aika;
-
-  if (aika <= 0) {
-    lopeta();
-  }
-}, 1000);
+function aloitaAlusta() {
+  i = 0;
+  pisteet = 0;
+  peliOhi = false;
+  document.getElementById("loppu").style.display = "none";
+  document.getElementById("palaute").innerText = "";
+  nayta();
+}
 
 function tallenna() {
-  let nimi = document.getElementById("nimi").value;
+  let nimi = document.getElementById("nimi").value.trim();
+
+  if (nimi === "") {
+    alert("Kirjoita nimi ensin.");
+    return;
+  }
 
   let lista = JSON.parse(localStorage.getItem("score") || "[]");
 
-  lista.push({nimi, pisteet});
+  lista.push({nimi:nimi, pisteet:pisteet});
 
   lista.sort((a,b) => b.pisteet - a.pisteet);
   lista = lista.slice(0, 10);
 
   localStorage.setItem("score", JSON.stringify(lista));
   naytaLista();
+
+  alert("Tulos tallennettu!");
 }
 
 function naytaLista() {
@@ -145,14 +236,21 @@ function naytaLista() {
   let html = "";
 
   lista.forEach((rivi, index) => {
-    html += `<tr>
-      <td>${index+1}</td>
-      <td>${rivi.nimi}</td>
-      <td>${rivi.pisteet}</td>
-    </tr>`;
+    html += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${rivi.nimi}</td>
+        <td>${rivi.pisteet} / 10</td>
+      </tr>
+    `;
   });
 
-  document.getElementById("lista").innerHTML = html;
+  document.getElementById("lista").innerHTML = html || "<tr><td colspan='3'>Ei tuloksia vielä.</td></tr>";
+}
+
+function tyhjennaHighscore() {
+  localStorage.removeItem("score");
+  naytaLista();
 }
 
 nayta();
